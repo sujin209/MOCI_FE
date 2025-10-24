@@ -1,5 +1,6 @@
-import { ResponseCatKey } from "@/app/(root)/archive/[[...category]]/page";
+import { ResponseCatKey } from "@/app/(root)/archive/components/ArchiveList";
 import { BASE_URL } from "./constants/config";
+import { APIerror } from "./getChatMsgMento";
 
 interface ArchiveThumbnail {
   id: number;
@@ -33,41 +34,34 @@ export const getArchiveList = async ({
     ? `${BASE_URL}/api/v1/archive/public?keyword=${keyword}&page=${page}&size=10&sort=createdAt`
     : `${BASE_URL}/api/v1/archive/public?page=${page}&size=10&sort=createdAt`;
 
-  try {
-    const res = await fetch(requestAPIUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json; charset: UTF-8",
-      },
-      credentials: "include",
-    });
+  const res = await fetch(requestAPIUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json; charset: UTF-8",
+    },
+    credentials: "include",
+  });
 
-    if (!res.ok) {
-      try {
-        const errorData = await res.json();
-        throw new Error(
-          errorData.message ?? "교육자료실 목록 조회에 실패하였습니다"
-        );
-      } catch {
-        throw new Error("교육자료실 목록 조회에 실패하였습니다");
-      }
-    }
-    const data = await res.json();
-    const updatedData = {
-      ...data.data,
-      archives: data.data.archives.map((item: ArchiveItem) => ({
-        ...item,
-        thumbnail: item.thumbnail
-          ? {
-              ...item.thumbnail,
-              file_url: `${BASE_URL}/uploads/${item.thumbnail.file_url}`,
-            }
-          : null,
-      })),
-    };
+  const data = await res.json();
+  if (!res.ok) {
+    const error: APIerror = { status: data.code, message: data.message };
+    throw error;
+  }
 
-    return updatedData;
-  } catch {}
+  const updatedData = {
+    ...data.data,
+    archives: data.data.archives.map((item: ArchiveItem) => ({
+      ...item,
+      thumbnail: item.thumbnail
+        ? {
+            ...item.thumbnail,
+            file_url: `${BASE_URL}/uploads/${item.thumbnail.file_url}`,
+          }
+        : null,
+    })),
+  };
+
+  return updatedData;
 };
 
 export const getArchiveSearchList = async ({
