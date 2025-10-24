@@ -4,14 +4,13 @@ import ManagerMain from "./components/ManagerMain";
 import MenteeMain from "./components/MenteeMain";
 import MentorMain from "./components/MentorMain";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Spinner from "@/shared/components/Spinner";
 
 function Page() {
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const isLoggingOut = useAuthStore((s) => s.isLoggingOut);
-  const [redirecting, setRedirecting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,7 +18,6 @@ function Page() {
     if (isLoggingOut) return;
 
     if (!user) {
-      setRedirecting(true);
       alert("로그인이 필요합니다.");
       router.replace("/login");
       return;

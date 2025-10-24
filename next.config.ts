@@ -5,7 +5,10 @@ const nextConfig: NextConfig = {
 
   images: {
     // 외부 도메인에서 이미지 로딩 허용
-    domains: ["localhost", "api.mydidimdol.com"],
+    remotePatterns: [
+      { protocol: "http", hostname: "localhost", pathname: "/**" },
+      { protocol: "https", hostname: "api.mydidimdol.com", pathname: "/**" },
+    ],
   },
 
   turbopack: {

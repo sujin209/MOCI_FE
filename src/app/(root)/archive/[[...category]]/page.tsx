@@ -1,4 +1,3 @@
-
 import KaKaoIcon from "@/assets/logos/KakaoTalk_logo.svg";
 import KTXLogo from "@/assets/logos/KTX_logo.svg";
 import YouTubeLogo from "@/assets/logos/YouTube_logo.svg";
@@ -6,23 +5,12 @@ import CoupangLogo from "@/assets/logos/Coupang_logo.svg";
 import BusLogo from "@/assets/logos/Bus_logo.svg";
 import Delivery from "@/assets/logos/Delivery_logo.svg";
 import ButtonGroup from "@/shared/components/ButtonGroup";
-import Button from "@/shared/components/Button";
-import Input from "@/shared/components/Input";
-import Pagination from "@/shared/components/Pagination";
-import { getArchiveList } from "@/api/getArchiveList";
-import { notFound } from "next/navigation";
-import ArchiveCard from "../components/ArchiveCard";
 import ArchiveButtons from "../components/ArchiveButtons";
 import HomeButton from "../components/HomeButton";
 import Image from "next/image";
-import { Metadata } from "next";
+import ArchiveList from "../components/ArchiveList";
 
-export const metadata: Metadata = {
-  title: "교육 자료실",
-  description: "교육 자료실 페이지",
-};
-
-const matchCategory = {
+export const matchCategory = {
   kakaotalk: { text: "카카오톡", cat: "KAKAO_TALK" },
   ktx: { text: "기차", cat: "KTX" },
   youtube: { text: "유튜브", cat: "YOUTUBE" },
@@ -32,45 +20,16 @@ const matchCategory = {
   all: { text: "전체자료", cat: undefined },
 } as const;
 
-const matchCatResponse = {
-  KAKAO_TALK: "kakaotalk",
-  YOUTUBE: "youtube",
-  KTX: "ktx",
-  INTERCITY_BUS: "bus",
-  BAEMIN: "delivery",
-  COUPANG: "coupang",
-};
-
-type CategoryKey = keyof typeof matchCategory;
-export type ResponseCatKey = keyof typeof matchCatResponse;
+export type CategoryKey = keyof typeof matchCategory;
 // type CategoryValue = (typeof matchCategory)[CategoryKey];
 
-interface ArchiveType {
-  id: number;
-  title: string;
-  thumbnail: { file_url: string }; // 파일업로드 기능 완료되면 수정필요
-  createdAt: string;
-  category: ResponseCatKey;
-}
-
-interface ArchiveResponseType {
-  archives: ArchiveType[];
-  currentPage: number;
-  totalElements: number;
-  totalPages: number;
-}
-
 async function Page({
-  searchParams,
   params,
 }: {
-  searchParams: Promise<{ page: string; keyword: string }>;
   params?: Promise<{ category: CategoryKey }>;
 }) {
-  const { page, keyword } = await searchParams;
   const param = await params;
   const category = param?.category ?? "all";
-  const currentPage = Number(page || 1);
   const items = [
     {
       icon: <KaKaoIcon />,
@@ -118,17 +77,15 @@ async function Page({
     },
   ];
 
-  const archiveList: ArchiveResponseType = await getArchiveList({
-    category: matchCategory[category].cat,
-    keyword: keyword,
-    page: String(currentPage - 1),
-  });
-
   const categoryIcons: Record<CategoryKey, React.ReactNode> = {
     kakaotalk: <KaKaoIcon className="w-9 h-9" />,
     ktx: <KTXLogo className="w-9 h-9" />,
-    youtube: <YouTubeLogo className="w-9 h-9 rounded-lg border border-gray-100" />,
-    coupang: <CoupangLogo className="w-9 h-9 rounded-lg border border-gray-100" />,
+    youtube: (
+      <YouTubeLogo className="w-9 h-9 rounded-lg border border-gray-100" />
+    ),
+    coupang: (
+      <CoupangLogo className="w-9 h-9 rounded-lg border border-gray-100" />
+    ),
     bus: <BusLogo className="w-9 h-9" />,
     delivery: <Delivery className="w-9 h-9 rounded-lg" />,
     all: (
@@ -137,36 +94,25 @@ async function Page({
         alt="디딤돌 로고"
         width={36}
         height={36}
+        style={{ width: "auto" }}
+        priority
       />
     ),
   };
 
-  if (!archiveList) notFound();
   return (
     <div className="flex flex-col gap-2 h-[calc(100dvh-48px)]">
       <HomeButton />
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div
+        className="flex-1 overflow-y-scroll min-h-0"
+        id="archiveScrollContainer"
+      >
         <h1 className="text-3xl text-darkgreen-default font-bold px-3 py-2">
           자주 찾는 서비스
         </h1>
         <div className="bg-lightyellow p-3 h-80">
           <ButtonGroup items={items} />
         </div>
-        <form className="flex justify-between items-center gap-3 px-5 py-3">
-          <label htmlFor="keyword" className="sr-only">
-            검색
-          </label>
-          <Input
-            type="text"
-            name="keyword"
-            id="keyword"
-            placeholder="검색어를 입력하세요"
-            defaultValue={keyword}
-          />
-          <Button type="submit" color="darkgreen">
-            검색
-          </Button>
-        </form>
         <div className="flex justify-between items-center p-5">
           <div className="flex items-center gap-3">
             {categoryIcons[category]}
@@ -176,33 +122,7 @@ async function Page({
           </div>
           <ArchiveButtons />
         </div>
-        <ul className="p-5 pt-0 flex flex-col gap-5">
-          {archiveList.archives ? (
-            archiveList.archives.map(
-              ({ id, title, thumbnail, createdAt, category }) => (
-                <ArchiveCard
-                  key={id}
-                  cardInfo={{
-                    id,
-                    imgsrc: thumbnail?.file_url ?? undefined,
-                    title: title,
-                    category:
-                      matchCategory[matchCatResponse[category] as CategoryKey]
-                        .text,
-                    createdAt: createdAt.slice(0, 10),
-                  }}
-                />
-              )
-            )
-          ) : (
-            <p className="flex-center">자료가 없습니다</p>
-          )}
-        </ul>
-        <Pagination
-          totalPages={archiveList.totalPages}
-          currentPage={currentPage}
-          keyword={keyword}
-        />
+        <ArchiveList category={category} />
       </div>
     </div>
   );

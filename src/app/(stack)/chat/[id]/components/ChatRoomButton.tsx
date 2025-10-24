@@ -60,13 +60,13 @@ function ChatRoomButton({
     e.preventDefault();
     try {
       if (!chatRoomInfo || user?.role !== "USER") return;
+      await deleteMentoChatRoom(id);
       const aiChatRoom = await createAIChatRoom(
         chatRoomInfo.category,
         chatRoomInfo.question
       );
       alert("AI 채팅방으로 이동합니다.");
       router.replace(`/chat/${aiChatRoom.id}/ai`);
-      await deleteMentoChatRoom(id);
     } catch (e) {
       const error = e as APIerror;
       alert(error.message);
