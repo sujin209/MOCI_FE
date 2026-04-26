@@ -15,6 +15,22 @@
 - 디지털 서비스 사용에 익숙하지 않으신 분들
 - 공공기관, 시니어 교육 기관에서 사용
 
+## 🎨 고려사항
+- 쉬운 UI/UX
+  - 영어 사용 최소화
+  - 아이콘보다 한글 안내문구 지향
+  - 가독성을 고려한 글자 및 버튼 크기 조정
+
+- 색상대비 고려
+  <img width="600" height="250" alt="image" src="https://github.com/user-attachments/assets/da1d433c-07a8-4b63-920c-648f6e5b1239" />
+
+- 웹 접근성 향상
+
+  [웹 접근성 향상](https://github.com/user-attachments/assets/da954038-b080-403e-a8e5-f842ebb65360)
+
+
+
+
 ## 🛠️ 기술스택
 
 | 영역 | 기술 |
